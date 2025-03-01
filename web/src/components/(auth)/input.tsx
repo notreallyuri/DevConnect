@@ -4,7 +4,7 @@ import cn from "@/utils/cn";
 import {
   faEye,
   faEyeSlash,
-} from "@awesome.me/kit-a322175488/icons/classic/solid";
+} from "@awesome.me/kit-a322175488/icons/classic/light";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export interface InputProps
@@ -62,7 +62,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             <button
               onClick={handleTogglePassword}
               className={cn(
-                "absolute top-1/2 right-4 flex size-5 -translate-y-1/2",
+                "absolute top-1/2 right-4 flex size-6 -translate-y-1/2 items-center justify-center",
+                "text-lg",
               )}
             >
               <FontAwesomeIcon icon={showPassword ? faEye : faEyeSlash} />

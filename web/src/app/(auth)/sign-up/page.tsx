@@ -4,7 +4,11 @@ import { Select, MultiSelect } from "@/components/(auth)/select";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, forwardRef } from "react";
 import { useRouter } from "next/navigation";
+import { userSchema } from "@/schemas/user";
 import cn from "@/utils/cn";
+
+import { useForm, useFormContext, FormProvider } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 type ButtonProps = {
   label: string;
@@ -30,6 +34,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 Button.displayName = "Button";
 
 function OnBoardBasic() {
+  const { register } = useFormContext();
+
   return (
     <div className="h-full">
       <motion.div
@@ -46,8 +52,13 @@ function OnBoardBasic() {
         >
           Basic Info
         </motion.h1>
-        <Input label="Email" />
-        <Input label="Password" type="password" />
+        <Input label="Email" {...register} />
+        <Input
+          label="Password"
+          type="password"
+          {...register}
+          showPasswordToggle
+        />
       </motion.div>
     </div>
   );
@@ -131,6 +142,11 @@ function OnBoardProfile() {
   );
 }
 function OnBoardPreferences() {
+  const {
+    formState: { errors },
+    control,
+  } = useFormContext();
+
   const techStackOptions = [
     { label: "Go", value: "Go" },
     { label: "TypeScript", value: "TypeScript" },
@@ -167,30 +183,24 @@ function OnBoardPreferences() {
         <Select
           label="Account Privacy"
           name="privacyStatus"
+          control={control}
           options={[
             { label: "Public", value: "public" },
             { label: "Private", value: "private" },
           ]}
+          error={errors.privacyStatus?.message as string}
         />
         <MultiSelect
           label="Preferred Stacks"
           name="preferredStacks"
+          control={control}
           options={techStackOptions.map((obj) => ({
             label: obj.label,
             value: obj.value,
           }))}
           defaultValue={[]}
+          error={errors.preferredStacks?.message as string}
         />
-        <select
-          name=""
-          id=""
-          className="h-10 w-full rounded-lg border border-white/10 bg-white/5"
-        >
-          <option value="">Teste</option>
-          <option value="">Teste</option>
-          <option value="">Teste</option>
-          <option value="">Teste</option>
-        </select>
       </div>
     </div>
   );
@@ -200,6 +210,8 @@ export default function Auth() {
   const [step, setStep] = useState<number>(1);
   const [direction, setDirection] = useState<"next" | "prev">("next");
   const router = useRouter();
+
+  const methods = useForm({ resolver: zodResolver(userSchema) });
 
   const handlePrevStep = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -273,50 +285,57 @@ export default function Auth() {
     },
   };
 
+  const send = () => {};
+
   return (
     <>
       <main className="flex h-screen w-screen">
         <div className="hidden h-screen w-full bg-zinc-800 lg:block"></div>
         <div className="relative flex h-screen w-full flex-col justify-center overflow-hidden px-4">
-          <form className="w-full px-48">
-            <div
-              className={cn(
-                "relative transition-all",
-                step === 1 && "h-62",
-                step === 2 && "h-88",
-                step === 3 && "h-60",
-              )}
+          <FormProvider {...methods}>
+            <form
+              onSubmit={methods.handleSubmit(send)}
+              className="w-full px-48"
             >
-              <AnimatePresence mode="wait" custom={direction}>
-                <motion.div
-                  key={step}
-                  variants={slideVariants}
-                  initial={
-                    direction === "next" ? "enterFromRight" : "enterFromLeft"
-                  }
-                  animate="center"
-                  exit={direction === "next" ? "exitToLeft" : "exitToRight"}
-                  className="absolute h-full w-full"
-                >
-                  {step === 1 && <OnBoardBasic />}
-                  {step === 2 && <OnBoardProfile />}
-                  {step === 3 && <OnBoardPreferences />}
-                </motion.div>
-              </AnimatePresence>
-            </div>
-            <div className="mt-6 flex gap-4">
-              <Button
-                label={step === 1 ? "Exit" : "Return"}
-                onClick={handlePrevStep}
-                type="button"
-              />
-              {step === 3 ? (
-                <Button label="Finish" type="submit" />
-              ) : (
-                <Button label="Next" onClick={handleNextStep} type="button" />
-              )}
-            </div>
-          </form>
+              <div
+                className={cn(
+                  "relative transition-all",
+                  step === 1 && "h-62",
+                  step === 2 && "h-88",
+                  step === 3 && "h-60",
+                )}
+              >
+                <AnimatePresence mode="wait" custom={direction}>
+                  <motion.div
+                    key={step}
+                    variants={slideVariants}
+                    initial={
+                      direction === "next" ? "enterFromRight" : "enterFromLeft"
+                    }
+                    animate="center"
+                    exit={direction === "next" ? "exitToLeft" : "exitToRight"}
+                    className="absolute h-full w-full"
+                  >
+                    {step === 1 && <OnBoardBasic />}
+                    {step === 2 && <OnBoardProfile />}
+                    {step === 3 && <OnBoardPreferences />}
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+              <div className="mt-6 flex gap-4">
+                <Button
+                  label={step === 1 ? "Exit" : "Return"}
+                  onClick={handlePrevStep}
+                  type="button"
+                />
+                {step === 3 ? (
+                  <Button label="Finish" type="submit" />
+                ) : (
+                  <Button label="Next" onClick={handleNextStep} type="button" />
+                )}
+              </div>
+            </form>
+          </FormProvider>
         </div>
       </main>
     </>
