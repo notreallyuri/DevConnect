@@ -1,9 +1,8 @@
 use crate::db::DbPool;
 use crate::errors::AppError;
-use crate::models::user::{self, NewUser, User};
+use crate::models::user::{NewUser, User};
 use crate::schema::users::dsl::*;
-use actix_web::{App, HttpResponse, Responder, web};
-use diesel::dsl::exists;
+use actix_web::{HttpResponse, Responder, web};
 use diesel::prelude::*;
 
 pub async fn get_users(pool: web::Data<DbPool>) -> Result<impl Responder, AppError> {
@@ -21,7 +20,7 @@ pub async fn get_users(pool: web::Data<DbPool>) -> Result<impl Responder, AppErr
 
 pub async fn get_user_by_id(
     pool: web::Data<DbPool>,
-    user_id: web::Path<i32>,
+    user_id: web::Path<String>,
 ) -> Result<impl Responder, AppError> {
     let mut conn = pool.get().map_err(|_| AppError::InternalServerError)?;
 
@@ -65,11 +64,11 @@ pub async fn create_user(
 
 pub async fn delete_user(
     pool: web::Data<DbPool>,
-    user_id: web::Path<i32>,
+    user_id: web::Path<String>,
 ) -> Result<impl Responder, AppError> {
     let user_id = user_id.into_inner();
 
-    async fn db_delete_user(pool: &DbPool, user_id: i32) -> Result<(), AppError> {
+    async fn db_delete_user(pool: &DbPool, user_id: String) -> Result<(), AppError> {
         let mut conn = pool.get().map_err(|_| AppError::InternalServerError)?;
         let exists = web::block(move || {
             diesel::select(diesel::dsl::exists(users.find(user_id))).get_result::<bool>(&mut conn)
