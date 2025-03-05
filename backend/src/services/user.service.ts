@@ -1,14 +1,67 @@
-export interface UserServiceInterface<Repository, Args, ReturnType> {
-  repository: Repository;
-  run(data: Args): Promise<ReturnType>;
-}
+import { prisma } from "@/utils";
+import { UserSchema } from "@/schemas";
+import { InternalServerError, NotFoundError, ConflictError } from "@/errors";
+import { Prisma, User } from "@prisma/client";
 
-export class UserService<Repository, Args, ReturnType> {
-  repository: Repository;
+export const userService = {
+  async create(data: UserSchema): Promise<User> {
+    try {
+      return await prisma.user.create({ data });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === "P2002")
+          throw new ConflictError("Email already in use.");
+      }
 
-  constructor(repository: Repository) {
-    this.repository = repository;
-  }
+      throw new InternalServerError("Error Creating User");
+    }
+  },
 
-  async run(data: Args) {}
-}
+  async findById(id: string): Promise<User> {
+    try {
+      const user = await prisma.user.findUnique({ where: { id } });
+
+      if (!user) throw new NotFoundError("User not found.");
+
+      return user;
+    } catch (error) {
+      throw new InternalServerError();
+    }
+  },
+
+  async findByEmail(email: string): Promise<User> {
+    try {
+      const user = await prisma.user.findUnique({ where: { email } });
+
+      if (!user) throw new NotFoundError("User not found.");
+
+      return user;
+    } catch (error) {
+      throw new InternalServerError();
+    }
+  },
+
+  async update(id: string, data: Partial<UserSchema>): Promise<User> {
+    try {
+      return await prisma.user.update({ where: { id }, data });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === "P2025") throw new NotFoundError("User not found");
+      }
+
+      throw new InternalServerError("Error Updating User");
+    }
+  },
+
+  async delete(id: string): Promise<void> {
+    try {
+      await prisma.user.delete({ where: { id } });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === "P2025") throw new NotFoundError("User not found.");
+      }
+
+      throw new InternalServerError("Error Deleting User");
+    }
+  },
+};
