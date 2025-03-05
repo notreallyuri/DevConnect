@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String @id @default(uuid())
+  username String @db.VarChar(30)
+  email    String @unique @db.VarChar(100)
+  password String @db.VarChar(20)
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  posts    Post[]
+  comments Comment[]
+
+  @@index([email])
+}
+
+model Post {
+  id        String  @id @default(uuid())
+  title     String  @db.VarChar(60)
+  content   String  @db.Text
+  published Boolean @default(false)
+
+  author   User   @relation(fields: [authorId], references: [id])
+  authorId String
+
+  comments Comment[]
+
+  @@index([authorId])
+}
+
+model Comment {
+  id      Int    @id @default(autoincrement())
+  content String
+
+  author   User   @relation(fields: [authorId], references: [id])
+  authorId String
+
+  origin Post   @relation(fields: [postId], references: [id])
+  postId String
+
+  createdAt DateTime @default(now())
+
+  @@index([postId])
+  @@index([authorId])
+}
