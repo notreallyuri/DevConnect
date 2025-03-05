@@ -5,7 +5,4 @@ export const PostSchema = z.object({
   content: z.string(),
 });
 
-export const UpdatePostSchema = PostSchema.partial();
-
 export type PostSchema = z.infer<typeof PostSchema>;
-export type UpdatePostSchema = z.infer<typeof UpdatePostSchema>;

@@ -1,14 +1,14 @@
 import { InternalServerError } from "@/errors";
+import { FastifyInstance } from "fastify";
 import { UserSchema } from "@/schemas";
 import { userService } from "@/services";
-import { FastifyInstance } from "fastify";
 
 export async function userRouter(app: FastifyInstance) {
   app.get("/user", async (req, res) => {
     try {
       const { id } = req.query as { id: string };
 
-      const user = await userService.findById(id);
+      const user = await userService.getById(id);
 
       return res.code(200).send({
         message: "User Found Successfully",
@@ -25,7 +25,7 @@ export async function userRouter(app: FastifyInstance) {
     try {
       const { email } = req.query as { email: string };
 
-      const user = await userService.findByEmail(email);
+      const user = await userService.getByEmail(email);
 
       return res.code(200).send({
         message: "User Found Successfully",

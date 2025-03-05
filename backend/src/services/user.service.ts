@@ -17,7 +17,7 @@ export const userService = {
     }
   },
 
-  async findById(id: string): Promise<User> {
+  async getById(id: string): Promise<User> {
     try {
       const user = await prisma.user.findUnique({ where: { id } });
 
@@ -29,7 +29,7 @@ export const userService = {
     }
   },
 
-  async findByEmail(email: string): Promise<User> {
+  async getByEmail(email: string): Promise<User> {
     try {
       const user = await prisma.user.findUnique({ where: { email } });
 
