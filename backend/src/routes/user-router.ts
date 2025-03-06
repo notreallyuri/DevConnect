@@ -1,10 +1,10 @@
-import { InternalServerError, NotFoundError } from "@/errors";
+import { InternalServerError, NotFoundError, AppError } from "@/errors";
 import { FastifyInstance } from "fastify";
 import { UserSchema } from "@/schemas";
 import { userRepository } from "@/repositories";
 
 export async function userRouter(app: FastifyInstance) {
-  app.get("/user/byId", async (req, res) => {
+  app.get("/user/id", async (req, res) => {
     try {
       const { id } = req.query as { id: string };
 
@@ -18,18 +18,12 @@ export async function userRouter(app: FastifyInstance) {
         user,
       });
     } catch (error) {
-      if (error instanceof NotFoundError) {
-        return res.code(404).send({
-          message: error.message,
-        });
-      }
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error occurred";
-      throw new InternalServerError(errorMessage);
+      if (error instanceof AppError) throw error;
+      throw new InternalServerError("Unknown error occurred");
     }
   });
 
-  app.get("/user/byEmail", async (req, res) => {
+  app.get("/user/email", async (req, res) => {
     try {
       const { email } = req.query as { email: string };
 
@@ -43,14 +37,24 @@ export async function userRouter(app: FastifyInstance) {
         user,
       });
     } catch (error) {
-      if (error instanceof NotFoundError) {
-        return res.code(404).send({
-          message: error.message,
-        });
-      }
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error occurred";
-      throw new InternalServerError(errorMessage);
+      if (error instanceof AppError) throw error;
+      throw new InternalServerError("Unknown error occurred");
+    }
+  });
+
+  app.get("/users", async (req, res) => {
+    try {
+      const users = await userRepository.getAll();
+
+      if (!users) throw new NotFoundError("Users Not Found");
+
+      return res.code(200).send({
+        message: "Users Found Successfully",
+        users,
+      });
+    } catch (error) {
+      if (error instanceof AppError) throw error;
+      throw new InternalServerError("Unknown error occurred");
     }
   });
 
@@ -64,9 +68,8 @@ export async function userRouter(app: FastifyInstance) {
         userId: user.id,
       });
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error occurred";
-      throw new InternalServerError(errorMessage);
+      if (error instanceof AppError) throw error;
+      throw new InternalServerError("Unknown error occurred");
     }
   });
 
@@ -80,9 +83,8 @@ export async function userRouter(app: FastifyInstance) {
         userId: user.id,
       });
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error occurred";
-      throw new InternalServerError(errorMessage);
+      if (error instanceof AppError) throw error;
+      throw new InternalServerError("Unknown error occurred");
     }
   });
 
@@ -92,6 +94,9 @@ export async function userRouter(app: FastifyInstance) {
 
       await userRepository.delete(id);
       return res.code(10).send({});
-    } catch (error) {}
+    } catch (error) {
+      if (error instanceof AppError) throw error;
+      throw new InternalServerError("Unknown error occurred");
+    }
   });
 }

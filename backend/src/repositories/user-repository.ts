@@ -1,6 +1,11 @@
 import { prisma } from "@/utils";
 import { UserSchema } from "@/schemas";
-import { InternalServerError, NotFoundError, ConflictError } from "@/errors";
+import {
+  InternalServerError,
+  NotFoundError,
+  ConflictError,
+  AppError,
+} from "@/errors";
 import { Prisma, User } from "@prisma/client";
 import { UserRepository } from "./user-repository-interface";
 
@@ -26,6 +31,7 @@ export const userRepository: UserRepository = {
 
       return user;
     } catch (error) {
+      if (error instanceof AppError) throw error;
       throw new InternalServerError();
     }
   },
@@ -38,6 +44,7 @@ export const userRepository: UserRepository = {
 
       return user;
     } catch (error) {
+      if (error instanceof AppError) throw error;
       throw new InternalServerError();
     }
   },
@@ -56,10 +63,27 @@ export const userRepository: UserRepository = {
 
   async delete(id) {
     try {
+      await prisma.post.deleteMany({
+        where: { authorId: id },
+      });
+
+      await prisma.comment.deleteMany({
+        where: { authorId: id },
+      });
+
       await prisma.user.delete({ where: { id } });
     } catch (error) {
+      if (error instanceof AppError) throw error;
+      throw new InternalServerError("Error Deleting User");
+    }
+  },
+
+  async getAll() {
+    try {
+      return await prisma.user.findMany();
+    } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === "P2025") throw new NotFoundError("User not found.");
+        if (error.code === "P2025") throw new NotFoundError("Users not found.");
       }
 
       throw new InternalServerError("Error Deleting User");

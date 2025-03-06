@@ -11,6 +11,7 @@ export const postRepository: PostRepository = {
       throw new InternalServerError("Error Creating Post");
     }
   },
+  
   async update(id, data) {
     try {
       return await prisma.post.update({ where: { id }, data });
@@ -22,6 +23,7 @@ export const postRepository: PostRepository = {
       throw new InternalServerError(`Error Editing Post: ${id}`);
     }
   },
+
   async getByUser(authorId) {
     try {
       return await prisma.post.findMany({ where: { authorId } });
@@ -33,6 +35,7 @@ export const postRepository: PostRepository = {
       throw new InternalServerError(`Error Finding Posts By: ${authorId}`);
     }
   },
+
   async getById(id) {
     try {
       const post = await prisma.post.findUnique({ where: { id } });
@@ -45,6 +48,7 @@ export const postRepository: PostRepository = {
       throw new InternalServerError(`Error Finding Post: ${id}`);
     }
   },
+
   async delete(id) {
     try {
       await prisma.post.delete({ where: { id } });
@@ -56,6 +60,7 @@ export const postRepository: PostRepository = {
       throw new InternalServerError("Error Deleting Post");
     }
   },
+
   async getCommentsByPost(id) {
     try {
       const post = await prisma.post.findUnique({ where: { id } });
