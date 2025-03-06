@@ -36,7 +36,7 @@ model Post {
   published Boolean @default(false)
   privacy   Privacy @default(Public)
 
-  author   User   @relation(fields: [authorId], references: [id])
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId String
 
   comments Comment[]
@@ -48,10 +48,10 @@ model Comment {
   id      Int    @id @default(autoincrement())
   content String
 
-  author   User   @relation(fields: [authorId], references: [id])
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId String
 
-  origin Post   @relation(fields: [postId], references: [id])
+  origin Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId String
 
   createdAt DateTime @default(now())
