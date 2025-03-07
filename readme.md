@@ -14,13 +14,11 @@ DevConnect is a platform designed to help developers find collaborators for thei
 ## Tech Stack
 
 - **Frontend**: Built with Next.js, React, and Zod for form validation.
-- **Backend**: Rust, with Diesel ORM for database interactions.
-- **Database**: Prisma (for initial schema design, to be adapted for Rust).
-- **Authentication**: NextAuth (for GitHub OAuth and email-based sign-up).
-- **Other Libraries**: TanStack Query, tRPC, Zustand.
+- **Backend**: Typescript, with Prisma, Fastify and Zod.
+- **Database**: Prisma to PostgreSQL.
+- **Authentication**: NextAuth (To be implemented).
 
 ## Prerequisites
 
-- Install [Node.js](https://nodejs.org/en/) (for the frontend).
-- Install [Rust](https://www.rust-lang.org/) (for the backend).
+- Install [Node.js](https://nodejs.org/en/)
 - Install [PostgreSQL](https://www.postgresql.org/) (or your preferred database).
